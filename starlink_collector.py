@@ -16,6 +16,8 @@ class StarlinkCollector:
         self.datadog_host = os.getenv("DATADOG_HOST", "172.17.0.4")
         self.datadog_port = int(os.getenv("DATADOG_PORT", "8125"))
         self.collection_interval = int(os.getenv("COLLECTION_INTERVAL", "60"))
+        self.version = os.getenv("VERSION", "1.00")
+        self.environment = os.getenv("ENVIRONMENT", "prod")
         
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         logger.info(f"Enhanced Starlink collector - IP: {self.starlink_ip}")
@@ -23,7 +25,7 @@ class StarlinkCollector:
     def send_metric(self, metric_name, value, metric_type="g"):
         try:
             # Add tags to the metric in StatsD format
-            tags = "service:network,device:starlink,segment:WAN"
+            tags = f"service:network,device:starlink,segment:WAN,version:{self.version},env:{self.environment}"
             metric_data = f"{metric_name}:{value}|{metric_type}|#{tags}".encode("utf-8")
             self.sock.sendto(metric_data, (self.datadog_host, self.datadog_port))
         except Exception as e:
